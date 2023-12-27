@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "805931390337",
+    "firebase_url": "https://socialapp-df3f0-default-rtdb.firebaseio.com",
+    "project_id": "socialapp-df3f0",
+    "storage_bucket": "socialapp-df3f0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:805931390337:android:d26c82f60f7ca939e3c480",
+        "android_client_info": {
+          "package_name": "com.example.whatsappclone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxu5gaUaqxvSuUpMB9V5uXOETcl9UPCJA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

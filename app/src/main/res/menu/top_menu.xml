@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/search"
+        android:title="Buscar"
+        android:icon="@drawable/icon_search"
+        app:showAsAction="always"/>
+    <item android:id="@+id/grupos"
+        android:title="Grupos"
+        android:iconTint="@color/white"/>
+    <item android:id="@+id/config"
+        android:title="Configuración"
+        android:iconTint="@color/white"/>
+    <item android:id="@+id/salir"
+        android:title="Salir"
+        android:iconTint="@color/white"/>
+</menu>

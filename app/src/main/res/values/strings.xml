@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">JorSociApp</string>
+    <string name="sms_login">Se enviará un mensaje para verificar su número de celular</string>
+</resources>
