@@ -89,13 +89,19 @@ public class MessageAdapter extends RecyclerView.Adapter{
 
             message.setFeeling(pos);
 
-
+            ////=================== subir el feeling al db ==============
             FirebaseDatabase.getInstance().getReference()
                 .child("chats")
                 .child(senderRoom)
                 .child("messages")
                 .child(message.getMessageId()).setValue(message);
 
+            FirebaseDatabase.getInstance().getReference()
+                    .child("chats")
+                    .child(receiverRoom)
+                    .child("messages")
+                    .child(message.getMessageId()).setValue(message);
+            //========================================================
 
 
             return true;
@@ -105,15 +111,17 @@ public class MessageAdapter extends RecyclerView.Adapter{
         if (holder.getClass()==SentViewHolder.class){
             SentViewHolder sentViewHolder = (SentViewHolder) holder;
             sentViewHolder.binding.tvMessageSent.setText(message.getMessage());
-            /*
+
             if (message.getFeeling()>=0){
                 message.setFeeling(reactions[(int) message.getFeeling()]);
+
+                sentViewHolder.binding.emoji.setImageResource(message.getFeeling());
                 sentViewHolder.binding.emoji.setVisibility(View.VISIBLE);
             }else {
                 sentViewHolder.binding.emoji.setVisibility(View.GONE);
-            }*/
+            }
 
-            //emojis
+            // pop up emojis
             sentViewHolder.binding.tvMessageSent.setOnTouchListener((v, event) -> {
                 popup.onTouch(v,event);
                 return false;
@@ -122,13 +130,21 @@ public class MessageAdapter extends RecyclerView.Adapter{
         }else {
             ReceivarViewHolder receivarViewHolder = (ReceivarViewHolder) holder;
             receivarViewHolder.binding.tvMessageReceiver.setText(message.getMessage());
-            /*
+
             if (message.getFeeling()>=0){
                 message.setFeeling(reactions[(int) message.getFeeling()]);
+
+                receivarViewHolder.binding.emoji.setImageResource(message.getFeeling());
                 receivarViewHolder.binding.emoji.setVisibility(View.VISIBLE);
             }else {
                 receivarViewHolder.binding.emoji.setVisibility(View.GONE);
-            }*/
+            }
+
+            // pop up emojis
+            receivarViewHolder.binding.tvMessageReceiver.setOnTouchListener((v, event) -> {
+                popup.onTouch(v,event);
+                return false;
+            });
         }
 
     }

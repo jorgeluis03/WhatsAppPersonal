@@ -3,7 +3,7 @@ package com.example.whatsappclone.model;
 public class Message {
     private String messageId,message,senderId;
     private long timestamp;
-    private int feeling;
+    private int feeling = -1;
 
     public Message(){}
     public Message(String message, String senderId,long timestamp) {

@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
@@ -82,10 +83,20 @@ public class ChatActivity extends AppCompatActivity {
         binding.buttonSend.setOnClickListener(v -> {
             String messageInput = binding.editTextInputMessage.getText().toString();
             binding.editTextInputMessage.setText(null);
+            Date date = new Date();
 
-            Message message = new Message(messageInput,senderId,new Date().getTime());
+            Message message = new Message(messageInput,senderId,date.getTime());
 
             String randomKey = database.getReference().push().getKey();
+
+
+            HashMap<String,Object> lastMsgObj = new HashMap<>();
+            lastMsgObj.put("lastMsg",message.getMessage());
+            lastMsgObj.put("lastMsgTime",date.getTime());
+
+            //poner en la db el ultimo mensaje
+            database.getReference().child("chats").child(senderRoom).updateChildren(lastMsgObj);
+            database.getReference().child("chats").child(receiverRoom).updateChildren(lastMsgObj);
 
             database.getReference().child("chats")
                     .child(senderRoom)
@@ -101,6 +112,8 @@ public class ChatActivity extends AppCompatActivity {
                                 .setValue(message);
 
                     });
+
+
 
         });
 

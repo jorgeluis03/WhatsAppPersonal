@@ -63,5 +63,8 @@ dependencies {
     //reactions
     implementation "com.github.pgreze:android-reactions:1.6"
 
+    //circle status
+    implementation 'com.github.3llomi:CircularStatusView:V1.0.3'
+
 
 }
