@@ -13,6 +13,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
@@ -22,10 +23,13 @@ import com.example.whatsappclone.R;
 import com.example.whatsappclone.adapter.TopStatusAdapter;
 import com.example.whatsappclone.adapter.UsersAdapter;
 import com.example.whatsappclone.databinding.ActivityMainBinding;
+import com.example.whatsappclone.model.Status;
 import com.example.whatsappclone.model.User;
 import com.example.whatsappclone.model.UserStatus;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -35,6 +39,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     TopStatusAdapter statusAdapter;
     Toolbar toolbar;
     ProgressDialog progressDialog;
+    User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +63,14 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setMessage("Subiendo estado...");
         progressDialog.setCancelable(false);
 
+        database.getReference().child("users")
+                        .child(FirebaseAuth.getInstance().getUid())
+                                .get().addOnSuccessListener(dataSnapshot -> {
+                                    user = dataSnapshot.getValue(User.class);
+                                });
+
         cargarUsers();
+        cargarEstados();
 
         toolbar = findViewById(R.id.toolbar);  // Asegúrate de tener un elemento con el ID 'toolbar' en tu layout
         setSupportActionBar(toolbar);
@@ -77,6 +90,52 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void cargarEstados() {
+
+        database.getReference().child("stories")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()){
+
+                            userStatuses = new ArrayList<>();
+
+                            for (DataSnapshot doc : snapshot.getChildren()) {
+                                UserStatus userStatus = new UserStatus();
+                                userStatus.setName(doc.child("name").getValue(String.class));
+                                userStatus.setProfileImagen(doc.child("profileImage").getValue(String.class));
+                                userStatus.setLastUpdated(doc.child("lastUpdate").getValue(Long.class));
+
+                                //para cada snapshot iterar sobre los estados
+                                List<Status> estadosList = new ArrayList<>();
+                                for (DataSnapshot estado : doc.child("estados").getChildren()) {
+                                    Status sampleStatus = estado.getValue(Status.class);
+                                    Log.d("msg-test",sampleStatus.getImageUrl());
+                                    estadosList.add(sampleStatus);
+                                }
+
+                                userStatus.setStatusList(estadosList);
+                                userStatuses.add(userStatus);
+                            }
+
+
+
+                            statusAdapter = new TopStatusAdapter(MainActivity.this,userStatuses);
+                            binding.recyclerViewStatus.setAdapter(statusAdapter);
+                            binding.recyclerViewStatus.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                            adapter.notifyDataSetChanged();
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
     public ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),result->{
         if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
 
@@ -91,9 +150,33 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful()){ //si ya se subio lo obtengo para cargarlo y mostrarlo
                             reference.getDownloadUrl().addOnSuccessListener(uri -> {
 
+                                UserStatus userStatus = new UserStatus();
+                                userStatus.setName(user.getName());
+                                userStatus.setProfileImagen(user.getProfileImage());
+                                userStatus.setLastUpdated(date.getTime());
+
+
+                                HashMap<String, Object> obj = new HashMap<>();
+                                obj.put("name",userStatus.getName());
+                                obj.put("profileImage",userStatus.getProfileImagen());
+                                obj.put("lastUpdate",userStatus.getLastUpdated());
+
+                                String imageUrl = uri.toString();
+                                Status status = new Status(imageUrl,userStatus.getLastUpdated());
+
+                                database.getReference().child("stories")
+                                                .child(FirebaseAuth.getInstance().getUid())
+                                                .updateChildren(obj);
+
+
+                                database.getReference().child("stories")
+                                                .child(FirebaseAuth.getInstance().getUid())
+                                                .child("estados")
+                                                .push()
+                                                .setValue(status);
+
+
                                 progressDialog.dismiss();
-
-
 
                             });
 
@@ -111,7 +194,10 @@ public class MainActivity extends AppCompatActivity {
                         users = new ArrayList<>();
                         for (DataSnapshot child : snapshot.getChildren()) {
                             User user = child.getValue(User.class);
-                            users.add(user);
+                            if(!user.getUid().equals(FirebaseAuth.getInstance().getUid())){
+                                users.add(user);
+                            }
+
                         }
                         adapter = new UsersAdapter(getApplicationContext(),users);
                         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -147,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         if(id==R.id.salir){
-            showToast("salir");
+            FirebaseAuth.getInstance().signOut();
             return true;
         }
         if(id==R.id.grupos){
