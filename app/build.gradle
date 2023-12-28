@@ -60,5 +60,8 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
 
+    //reactions
+    implementation "com.github.pgreze:android-reactions:1.6"
+
 
 }

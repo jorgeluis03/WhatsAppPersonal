@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingTop="8dp"
     android:paddingEnd="8dp">
 
@@ -14,4 +15,15 @@
         android:textColor="@color/white"
         android:padding="10dp"
         android:layout_alignParentEnd="true"/>
+    <ImageView
+        android:id="@+id/emoji"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="5dp"
+        android:background="@drawable/background_circle"
+        app:srcCompat="@drawable/emoji_sorpresa"
+        android:layout_below="@+id/tvMessageSent"
+        android:layout_marginTop="-10dp"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone"/>
 </RelativeLayout>

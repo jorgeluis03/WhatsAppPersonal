@@ -30,8 +30,8 @@ public class ChatActivity extends AppCompatActivity {
     ActivityChatBinding binding;
     List<Message> messages;
     MessageAdapter adapter;
-    String chatRoomId;
     FirebaseDatabase database;
+    String senderRoom, receiverRoom;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,53 +40,69 @@ public class ChatActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
 
-
-
+        messages = new ArrayList<>();
 
 
         String receiverName = getIntent().getStringExtra("name");
         String receiverId = getIntent().getStringExtra("uid");
         String senderId = FirebaseAuth.getInstance().getUid();
+
         binding.tvName.setText(receiverName);
+        senderRoom = senderId+receiverId;
+        receiverRoom = receiverId+senderId;
 
-        chatRoomId = FirebaseUtils.getStringChatroomId(senderId,receiverId);
+        adapter = new MessageAdapter(this,messages,senderRoom,receiverRoom);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerView.setAdapter(adapter);
 
+        database.getReference().child("chats")
+                .child(senderRoom)
+                .child("messages")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        messages.clear();
+
+                        for (DataSnapshot child : snapshot.getChildren()) {
+                            Message message = child.getValue(Message.class);
+                            message.setMessageId(child.getKey());
+                            messages.add(message);
+                        }
+
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+        //enviar mensaje
         binding.buttonSend.setOnClickListener(v -> {
             String messageInput = binding.editTextInputMessage.getText().toString();
             binding.editTextInputMessage.setText(null);
 
             Message message = new Message(messageInput,senderId,new Date().getTime());
 
-            FirebaseUtils.getChatroomIdReference(chatRoomId).setValue(new ChatRoom(chatRoomId, Arrays.asList(senderId,receiverId),senderId))
+            String randomKey = database.getReference().push().getKey();
+
+            database.getReference().child("chats")
+                    .child(senderRoom)
+                    .child("messages")
+                    .child(randomKey)// push es el simil de add, es decir que genera una Id aleatorio
+                    .setValue(message)
                     .addOnSuccessListener(unused -> {
-                        FirebaseUtils.getChatsToChatRoomId(chatRoomId).setValue(message);
+
+                        database.getReference().child("chats")
+                                .child(receiverRoom)
+                                .child("messages")
+                                .child(randomKey)//es el simil de add, es decir que genera una Id aleatorio
+                                .setValue(message);
+
                     });
+
         });
-
-        database.getReference().child("chatRooms")
-                .child("chats")
-                .child("messages")
-                .push()
-                        .addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                messages = new ArrayList<>();
-                                for (DataSnapshot child : snapshot.getChildren()) {
-                                    Message message = child.getValue(Message.class);
-                                    Log.d("msg-test",message.getMessage());
-                                    messages.add(message);
-                                }
-                                adapter = new MessageAdapter(getApplicationContext(),messages);
-                                binding.recyclerView.setAdapter(adapter);
-                                binding.recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
 
         //back
         binding.buttonBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());

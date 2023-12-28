@@ -43,7 +43,8 @@
         android:layout_height="match_parent"
         android:id="@+id/recyclerView"
         android:layout_below="@+id/toolbar"
-        android:layout_above="@+id/rlInput"/>
+        android:layout_above="@+id/rlInput"
+        app:stackFromEnd="true"/>
 
     <RelativeLayout
         android:id="@+id/rlInput"
