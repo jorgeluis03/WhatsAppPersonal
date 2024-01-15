@@ -234,6 +234,9 @@ public class MainActivity extends AppCompatActivity {
         }
         if(id==R.id.salir){
             FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(MainActivity.this, SplashActivity.class);
+            startActivity(intent);
+            finish();
             return true;
         }
         if(id==R.id.grupos){

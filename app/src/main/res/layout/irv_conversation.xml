@@ -9,7 +9,8 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@drawable/userdefecto"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true"
+        />
 
     <LinearLayout
         android:layout_width="wrap_content"
