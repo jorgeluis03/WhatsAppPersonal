@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
                             statusAdapter = new TopStatusAdapter(MainActivity.this,userStatuses);
                             binding.recyclerViewStatus.setAdapter(statusAdapter);
-                            binding.recyclerViewStatus.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                            binding.recyclerViewStatus.setLayoutManager(new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false));
                             adapter.notifyDataSetChanged();
 
                         }
